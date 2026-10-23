@@ -8,109 +8,7 @@ app = Flask(__name__)
 
 EXCEL_JANA = 'مبيعات_جنى_الوديان_الموحد.xlsx'
 EXCEL_NATURE = 'مبيعات_جمال_الطبيعة.xlsx'
-STOCK_JANA = 'مخزون_جنى_الوديان.xlsx'
-STOCK_NATURE = 'مخزون_جمال_الطبيعة.xlsx'
 file_lock = threading.Lock()
-
-initial_products_jana = [
-    (1, "زيت الزيتون 250 مل", 4000, "oils", 200),
-    (2, "زيت الزيتون 500 مل", 8000, "oils", 200),
-    (3, "زيت الزيتون 3 لتر", 35000, "oils", 200),
-    (4, "زيت الزيتون 10 لتر", 100000, "oils", 200),
-    (5, "ماء الزهر العضوي", 3000, "distillates", 200),
-    (6, "ماء الورد العضوي", 3000, "distillates", 200),
-    (7, "ماء الشمار العضوي", 3000, "distillates", 200),
-    (8, "ماء القصعين / المرمية", 3000, "distillates", 200),
-    (9, "ماء الزعتر العضوي", 3000, "distillates", 200),
-    (10, "ماء المركدوش العضوي", 3000, "distillates", 200),
-    (11, "شراب الورد المركز", 4000, "drinks", 200),
-    (12, "شراب التوت المركز", 4000, "drinks", 200),
-    (13, "شراب الجلاب", 4000, "drinks", 200),
-    (14, "شراب تمر هندي", 4000, "drinks", 200),
-    (15, "شراب الرمان", 4000, "drinks", 200),
-    (16, "شراب الفراولة", 4000, "drinks", 200),
-    (17, "شراب النعنع", 4000, "drinks", 200),
-    (18, "مربى التين", 3000, "jams", 200),
-    (19, "مربى المشمش", 3000, "jams", 200),
-    (20, "مربى التوت", 3000, "jams", 200),
-    (21, "مربى الكرز", 3000, "jams", 200),
-    (22, "مربى الفراولة", 3000, "jams", 200),
-    (23, "خل البلسمك", 2000, "vinegar", 200),
-    (24, "خل العنب", 2500, "vinegar", 200),
-    (25, "خل تفاح", 2500, "vinegar", 200),
-    (26, "دبس رمان الأمير 250 مل", 2000, "vinegar", 200),
-    (27, "دبس رمان 500 مل بلاستك", 3000, "vinegar", 200),
-    (28, "دبس رمان زجاجي 500 مل", 4000, "vinegar", 200),
-    (29, "سماق 400 غرام", 6000, "spices", 200),
-    (30, "زعتر نابلسي 250 غرام", 6000, "spices", 200),
-    (31, "زعتر بالصنوبر 250 غرام", 6000, "spices", 200),
-    (32, "زعتر اكسترا لبناني 400 غرام", 8000, "spices", 200),
-    (33, "شطة حلوة 600 غرام", 6000, "spices", 200),
-    (34, "شطة حارة 600 غرام", 5000, "spices", 200),
-    (35, "مكدوس باذنجان بالجوز محشي لبنة 600غ", 10000, "pickles", 200),
-    (36, "مكدوس باذنجان بالجوز 600 غرام", 8000, "pickles", 200),
-    (37, "كبيس كورنيشون 600 غرام", 5000, "pickles", 200),
-    (38, "كبيس لفت 600 غرام", 3000, "pickles", 200),
-    (39, "كبيس مشكل", 3000, "pickles", 200),
-    (40, "كبيس خيار", 3000, "pickles", 200),
-    (41, "زيتون مشوي 600 غرام", 8000, "olives", 200),
-    (42, "زيتون أخضر محشي لبنة 600 غرام", 8000, "olives", 200),
-    (43, "زيتون أخضر محشي خضار 600 غرام", 8000, "olives", 200),
-    (44, "زيتون أخضر بالزعتر الأخضر 600 غرام", 6000, "olives", 200),
-    (45, "زيتون أخضر محشي جزر 600 غرام", 6000, "olives", 200),
-    (46, "زيتون أسود شرائح 600 غرام", 5000, "olives", 200),
-    (47, "زيتون أخضر شرائح", 5000, "olives", 200),
-    (48, "زيتون أخضر حب 600 غرام", 5000, "olives", 200),
-    (49, "زيتون أسود حب", 5000, "olives", 200),
-    (50, "جبنة قطع حبة البركة", 9000, "dairy", 200),
-    (51, "جبنة قطع نعنع", 9000, "dairy", 200),
-    (52, "جبنة قطع زعتر", 9000, "dairy", 200),
-    (53, "جبنة قطع سادة", 9000, "dairy", 200),
-    (54, "لبنة خلطة بالشطة الحارة 600 غرام", 7000, "dairy", 200),
-    (55, "لبنة خلطة بالزعتر 600 غرام", 7000, "dairy", 200),
-    (56, "لبنة خلطة سادة بزيت الزيتون 600 غرام", 7000, "dairy", 200),
-    (57, "لبنة خلطة بالبيتزا 600 غرام", 7000, "dairy", 200),
-    (58, "لبنة بالمكسرات 600 غرام", 7000, "dairy", 200),
-    (59, "لبنة كرات كوكتيل 600 غرام", 8000, "dairy", 200),
-    (60, "لبنة كرات حبة البركة 600 غرام", 8000, "dairy", 200),
-    (61, "لبنة كرات سادة 600 غرام", 8000, "dairy", 200),
-    (62, "لبنة كرات بالزعتر 600 غرام", 8000, "dairy", 200),
-    (63, "لبنة كرات بالنعنع 600 غرام", 8000, "dairy", 200),
-    (64, "لبنة كرات بالشطة 600 غرام", 8000, "dairy", 200)
-]
-
-# المنتجات المحدثة بالكامل لشركة جمال الطبيعة (200 قطعة لكل صنف)
-initial_products_nature = [
-    (101, "ماسك الذهب (Gold Mask)", 3000, "masks", 200),
-    (102, "ماسك الألويفيرا (Aloe Vera Mask)", 3000, "masks", 200),
-    (103, "ماسك الفحم (Charcoal Mask)", 3000, "masks", 200),
-    (104, "غسول البشرة - روح الإنعاش", 2000, "cleansers", 200),
-    (105, "كريم تجاعيد الوجه", 10000, "creams", 200),
-    (106, "كريم حب الشباب", 10000, "creams", 200),
-    (107, "كريم تفتيح البشرة", 10000, "creams", 200),
-    (108, "كريم تفتيح البقع الداكنة", 12000, "creams", 200),
-    (109, "كريم نهاري (Day Cream)", 15000, "creams", 200),
-    (110, "كريم ليلي (Night Cream)", 15000, "creams", 200),
-    (111, "كريم العناية بالأظافر", 12000, "creams", 200),
-    (112, "كريم العناية بالقدم", 12000, "creams", 200),
-    (113, "كريم خطوط الجلد", 12000, "creams", 200),
-    (114, "لوشن للجسم (Body Lotion)", 8000, "body", 200),
-    (115, "زيت عطري - جمال الطبيعة", 9000, "oils", 200),
-    (116, "زيت عطري - عود", 9000, "oils", 200),
-    (117, "زيت عطري - العطر الفرنسي", 9000, "oils", 200),
-    (118, "زيت مساج (Massage Oil)", 5000, "oils", 200),
-    (119, "سنفرة السكر - فراولة", 8000, "scrubs", 200),
-    (120, "سنفرة السكر - جمال الطبيعة", 8000, "scrubs", 200),
-    (121, "سنفرة السكر - أجمل إحساس", 8000, "scrubs", 200),
-    (122, "سنفرة الوجه مع العسل", 12000, "scrubs", 200),
-    (123, "زيت حشيشة الهليون الأخضر للشعر", 15000, "hair", 200),
-    (124, "زيت تطويل الرموش", 5000, "hair", 200),
-    (125, "شامبو خلاصة العسل والأعشاب", 8000, "hair", 200),
-    (126, "صابون الشبة والمسك والبابونج", 3000, "soap", 200),
-    (127, "صابون الحبة السوداء", 3000, "soap", 200),
-    (128, "صابون زيت الأرغان وجنين القمح", 3000, "soap", 200),
-    (129, "صابون الكركم والكبريت والعكبر", 3000, "soap", 200)
-]
 
 with file_lock:
     if not os.path.exists(EXCEL_JANA):
@@ -126,12 +24,6 @@ with file_lock:
             'تفاصيل المواد المباعة', 'عدد القطع', 'المجموع الفرعي (د.ع)',
             'الخصم (د.ع)', 'الصافي المستلم (د.ع)', 'ملاحظات'
         ]).to_excel(EXCEL_NATURE, index=False)
-
-    if not os.path.exists(STOCK_JANA):
-        pd.DataFrame(initial_products_jana, columns=['id', 'name', 'price', 'cat', 'stock']).to_excel(STOCK_JANA, index=False)
-
-    if not os.path.exists(STOCK_NATURE):
-        pd.DataFrame(initial_products_nature, columns=['id', 'name', 'price', 'cat', 'stock']).to_excel(STOCK_NATURE, index=False)
 
 HTML_PAGE = """<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -186,14 +78,10 @@ HTML_PAGE = """<!DOCTYPE html>
     
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(142px, 1fr)); gap: 9px; margin-bottom: 20px; }
     .card { background: #fff; border-radius: 11px; padding: 10px; border: 1.5px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; }
-    .card.out-stock { background: #fdf2f2; border-color: #fca5a5; opacity: 0.8; }
     .card-badge { position: absolute; top: 6px; left: 6px; background: var(--current-leaf, #84b53a); color: #fff; font-weight: bold; font-size: 0.78rem; width: 24px; height: 24px; border-radius: 50%; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
-    .card h4 { font-size: 0.84rem; color: #222; margin-bottom: 4px; line-height: 1.35; padding-left: 20px; }
-    .stock-info { font-size: 0.75rem; font-weight: bold; color: #0284c7; margin-bottom: 4px; }
-    .stock-info.low { color: #dc2626; }
+    .card h4 { font-size: 0.84rem; color: #222; margin-bottom: 6px; line-height: 1.35; padding-left: 20px; }
     .price { font-size: 0.92rem; font-weight: 800; color: #b08900; margin-bottom: 8px; }
     .btn-add { width: 100%; padding: 8px 4px; background: var(--current-primary, #14361b); color: #fff; border: none; border-radius: 7px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
-    .btn-add:disabled { background: #cbd5e1; cursor: not-allowed; }
     
     .cart { background: #fff; border-radius: 12px; padding: 15px; border: 2px solid var(--current-primary, #14361b); box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
     .item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f3f5; font-size: 0.88rem; }
@@ -201,8 +89,14 @@ HTML_PAGE = """<!DOCTYPE html>
     .row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.92rem; }
     .total { font-size: 1.2rem; font-weight: bold; color: var(--current-primary, #14361b); border-top: 2px dashed #dee2e6; padding-top: 10px; margin-top: 10px; }
     .input { width: 100%; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 10px; font-size: 0.88rem; }
+    
+    .percent-discounts { display: none; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+    .percent-btn { flex: 1; padding: 5px 2px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; text-align: center; }
+    .percent-btn:hover { background: #e2e8f0; }
+
     .actions { display: flex; gap: 8px; margin-top: 12px; }
     .btn-save { flex: 2; padding: 13px; background: var(--current-primary, #14361b); color: #fff; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
+    .btn-print { flex: 1; padding: 13px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-clear { flex: 1; padding: 13px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     #toast { display: none; margin-top: 10px; background: #d1fae5; color: #065f46; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #34d399; }
     
@@ -211,6 +105,13 @@ HTML_PAGE = """<!DOCTYPE html>
     
     .floating-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--current-primary, #14361b); color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--current-leaf, #84b53a); z-index: 30; box-shadow: 0 -2px 10px rgba(0,0,0,0.18); }
     .floating-bar button { background: var(--current-leaf, #84b53a); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; font-size: 0.88rem; cursor: pointer; }
+
+    /* تنسيق خاص للطباعة */
+    @media print {
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: #fff; color: #000; direction: rtl; }
+    }
   </style>
 </head>
 <body>
@@ -255,7 +156,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
     <div class="search-section">
       <div class="search-header">
-        <span id="search-title">🔍 البحث السريع بالمخزون</span>
+        <span id="search-title">🔍 البحث السريع في المنتجات</span>
         <span id="search-results-count" style="color:var(--current-leaf);">يعرض المنتجات</span>
       </div>
       <div class="search-input-wrap">
@@ -275,16 +176,26 @@ HTML_PAGE = """<!DOCTYPE html>
       <div id="list"><p style="color:#888; text-align:center; margin:14px 0;">اضغط على المنتجات بالأعلى لإضافتها للفاتورة</p></div>
 
       <div class="row"><span>المجموع الفرعي:</span><span id="sub">0 د.ع</span></div>
-      <div class="row">
-        <span>خصم مباشر (د.ع):</span>
-        <input type="number" id="disc" value="0" step="500" style="width:110px; padding:6px; text-align:center; border:1px solid #ccc; border-radius:6px; font-weight:bold;" oninput="renderCart()">
+      <div class="row" style="flex-direction:column; align-items:stretch;">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <span>خصم مباشر (د.ع):</span>
+          <input type="number" id="disc" value="0" step="500" style="width:130px; padding:6px; text-align:center; border:1px solid #ccc; border-radius:6px; font-weight:bold;" oninput="renderCart()">
+        </div>
+        <div class="percent-discounts" id="percent-discounts-box">
+          <button class="percent-btn" onclick="applyPercentDiscount(10)">خصم 10%</button>
+          <button class="percent-btn" onclick="applyPercentDiscount(20)">خصم 20%</button>
+          <button class="percent-btn" onclick="applyPercentDiscount(30)">خصم 30%</button>
+          <button class="percent-btn" onclick="applyPercentDiscount(40)">خصم 40%</button>
+          <button class="percent-btn" onclick="applyPercentDiscount(50)">خصم 50%</button>
+        </div>
       </div>
       <div class="row total"><span>الصافي للدفع:</span><span id="tot">0 د.ع</span></div>
 
       <input type="text" id="notes" class="input" placeholder="ملاحظات إضافية أو اسم الزبون (اختياري)...">
 
       <div class="actions">
-        <button class="btn-save" id="btn-save" onclick="submitOrder()">💾 حفظ الفاتورة وخصم المخزون</button>
+        <button class="btn-save" id="btn-save" onclick="submitOrder()">💾 حفظ الفاتورة</button>
+        <button class="btn-print" onclick="printReceipt()">🖨️ طباعة</button>
         <button class="btn-clear" onclick="clearCart()">تصفير</button>
       </div>
       <div id="toast"></div>
@@ -293,6 +204,39 @@ HTML_PAGE = """<!DOCTYPE html>
     <div class="dev-footer">
       <div>تصميم وتطوير المبرمج <strong>مصطفى عبد الرزاق</strong></div>
       <a href="tel:07759093905" style="color:#38bdf8; text-decoration:none;">📞 07759093905</a>
+    </div>
+  </div>
+
+  <!-- منطقة الفاتورة الخفية المخصصة للطباعة -->
+  <div id="print-area" style="display:none;">
+    <div style="text-align:center; margin-bottom:15px;">
+      <h2 id="print-comp-name" style="font-size:1.4rem; margin-bottom:4px;"></h2>
+      <p style="font-size:0.85rem; color:#555;">إيصال مبيعات رسمي</p>
+      <hr style="border:0; border-top:1px dashed #000; margin:8px 0;">
+    </div>
+    <div style="font-size:0.9rem; margin-bottom:10px;">
+      <div><strong>التاريخ:</strong> <span id="print-date"></span></div>
+      <div><strong>البائع/الكاشير:</strong> <span id="print-seller"></span></div>
+    </div>
+    <table style="width:100%; border-collapse:collapse; font-size:0.88rem; margin-bottom:10px;">
+      <thead>
+        <tr style="border-bottom:1px solid #000;">
+          <th style="text-align:right; padding:4px;">المادة</th>
+          <th style="text-align:center; padding:4px;">الكمية</th>
+          <th style="text-align:left; padding:4px;">المجموع</th>
+        </tr>
+      </thead>
+      <tbody id="print-items-body"></tbody>
+    </table>
+    <hr style="border:0; border-top:1px dashed #000; margin:8px 0;">
+    <div style="font-size:0.9rem;">
+      <div style="display:flex; justify-content:space-between;"><span>المجموع الفرعي:</span> <span id="print-sub"></span></div>
+      <div style="display:flex; justify-content:space-between;"><span>الخصم:</span> <span id="print-disc"></span></div>
+      <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.1rem; margin-top:5px;"><span>الصافي المطلوب:</span> <span id="print-tot"></span></div>
+    </div>
+    <div style="text-align:center; margin-top:20px; font-size:0.8rem; color:#555;">
+      <p>شكراً لزيارتكم!</p>
+      <p>تصميم: مصطفى عبد الرزاق</p>
     </div>
   </div>
 
@@ -311,7 +255,121 @@ HTML_PAGE = """<!DOCTYPE html>
 
     document.getElementById('seller-name').value = localStorage.getItem('active_seller') || '';
     var currentCompany = localStorage.getItem('jw_active_company') || 'jana';
-    var productsData = { jana: [], nature: [] };
+
+    var productsJana = [
+      { id: 1, name: "زيت الزيتون 250 مل", price: 4000, cat: "oils" },
+      { id: 2, name: "زيت الزيتون 500 مل", price: 8000, cat: "oils" },
+      { id: 3, name: "زيت الزيتون 3 لتر", price: 35000, cat: "oils" },
+      { id: 4, name: "زيت الزيتون 10 لتر", price: 100000, cat: "oils" },
+      { id: 5, name: "ماء الزهر العضوي", price: 3000, cat: "distillates" },
+      { id: 6, name: "ماء الورد العضوي", price: 3000, cat: "distillates" },
+      { id: 7, name: "ماء الشمار العضوي", price: 3000, cat: "distillates" },
+      { id: 8, name: "ماء القصعين / المرمية", price: 3000, cat: "distillates" },
+      { id: 9, name: "ماء الزعتر العضوي", price: 3000, cat: "distillates" },
+      { id: 10, name: "ماء المركدوش العضوي", price: 3000, cat: "distillates" },
+      { id: 11, name: "شراب الورد المركز", price: 4000, cat: "drinks" },
+      { id: 12, name: "شراب التوت المركز", price: 4000, cat: "drinks" },
+      { id: 13, name: "شراب الجلاب", price: 4000, cat: "drinks" },
+      { id: 14, name: "شراب تمر هندي", price: 4000, cat: "drinks" },
+      { id: 15, name: "شراب الرمان", price: 4000, cat: "drinks" },
+      { id: 16, name: "شراب الفراولة", price: 4000, cat: "drinks" },
+      { id: 17, name: "شراب النعنع", price: 4000, cat: "drinks" },
+      { id: 18, name: "مربى التين", price: 3000, cat: "jams" },
+      { id: 19, name: "مربى المشمش", price: 3000, cat: "jams" },
+      { id: 20, name: "مربى التوت", price: 3000, cat: "jams" },
+      { id: 21, name: "مربى الكرز", price: 3000, cat: "jams" },
+      { id: 22, name: "مربى الفراولة", price: 3000, cat: "jams" },
+      { id: 23, name: "خل البلسمك", price: 2000, cat: "vinegar" },
+      { id: 24, name: "خل العنب", price: 2500, cat: "vinegar" },
+      { id: 25, name: "خل تفاح", price: 2500, cat: "vinegar" },
+      { id: 26, name: "دبس رمان الأمير 250 مل", price: 2000, cat: "vinegar" },
+      { id: 27, name: "دبس رمان 500 مل بلاستك", price: 3000, cat: "vinegar" },
+      { id: 28, name: "دبس رمان زجاجي 500 مل", price: 4000, cat: "vinegar" },
+      { id: 29, name: "سماق 400 غرام", price: 6000, cat: "spices" },
+      { id: 30, name: "زعتر نابلسي 250 غرام", price: 6000, cat: "spices" },
+      { id: 31, name: "زعتر بالصنوبر 250 غرام", price: 6000, cat: "spices" },
+      { id: 32, name: "زعتر اكسترا لبناني 400 غرام", price: 8000, cat: "spices" },
+      { id: 33, name: "شطة حلوة 600 غرام", price: 6000, cat: "spices" },
+      { id: 34, name: "شطة حارة 600 غرام", price: 5000, cat: "spices" },
+      { id: 35, name: "مكدوس باذنجان بالجوز محشي لبنة 600غ", price: 10000, cat: "pickles" },
+      { id: 36, name: "مكدوس باذنجان بالجوز 600 غرام", price: 8000, cat: "pickles" },
+      { id: 37, name: "كبيس كورنيشون 600 غرام", price: 5000, cat: "pickles" },
+      { id: 38, name: "كبيس لفت 600 غرام", price: 3000, cat: "pickles" },
+      { id: 39, name: "كبيس مشكل", price: 3000, cat: "pickles" },
+      { id: 40, name: "كبيس خيار", price: 3000, cat: "pickles" },
+      { id: 41, name: "زيتون مشوي 600 غرام", price: 8000, cat: "olives" },
+      { id: 42, name: "زيتون أخضر محشي لبنة 600 غرام", price: 8000, cat: "olives" },
+      { id: 43, name: "زيتون أخضر محشي خضار 600 غرام", price: 8000, cat: "olives" },
+      { id: 44, name: "زيتون أخضر بالزعتر الأخضر 600 غرام", price: 6000, cat: "olives" },
+      { id: 45, name: "زيتون أخضر محشي جزر 600 غرام", price: 6000, cat: "olives" },
+      { id: 46, name: "زيتون أسود شرائح 600 غرام", price: 5000, cat: "olives" },
+      { id: 47, name: "زيتون أخضر شرائح", price: 5000, cat: "olives" },
+      { id: 48, name: "زيتون أخضر حب 600 غرام", price: 5000, cat: "olives" },
+      { id: 49, name: "زيتون أسود حب", price: 5000, cat: "olives" },
+      { id: 50, name: "جبنة قطع حبة البركة", price: 9000, cat: "dairy" },
+      { id: 51, name: "جبنة قطع نعنع", price: 9000, cat: "dairy" },
+      { id: 52, name: "جبنة قطع زعتر", price: 9000, cat: "dairy" },
+      { id: 53, name: "جبنة قطع سادة", price: 9000, cat: "dairy" },
+      { id: 54, name: "لبنة خلطة بالشطة الحارة 600 غرام", price: 7000, cat: "dairy" },
+      { id: 55, name: "لبنة خلطة بالزعتر 600 غرام", price: 7000, cat: "dairy" },
+      { id: 56, name: "لبنة خلطة سادة بزيت الزيتون 600 غرام", price: 7000, cat: "dairy" },
+      { id: 57, name: "لبنة خلطة بالبيتزا 600 غرام", price: 7000, cat: "dairy" },
+      { id: 58, name: "لبنة بالمكسرات 600 غرام", price: 7000, cat: "dairy" },
+      { id: 59, name: "لبنة كرات كوكتيل 600 غرام", price: 8000, cat: "dairy" },
+      { id: 60, name: "لبنة كرات حبة البركة 600 غرام", price: 8000, cat: "dairy" },
+      { id: 61, name: "لبنة كرات سادة 600 غرام", price: 8000, cat: "dairy" },
+      { id: 62, name: "لبنة كرات بالزعتر 600 غرام", price: 8000, cat: "dairy" },
+      { id: 63, name: "لبنة كرات بالنعنع 600 غرام", price: 8000, cat: "dairy" },
+      { id: 64, name: "لبنة كرات بالشطة 600 غرام", price: 8000, cat: "dairy" }
+    ];
+
+    var productsNature = [
+      { id: 100, name: "سيروم الشعر المغذي", price: 45000, cat: "hair" },
+      { id: 101, name: "ماسك الذهب (Gold Mask)", price: 3000, cat: "masks" },
+      { id: 102, name: "ماسك الألويفيرا (Aloe Vera Mask)", price: 3000, cat: "masks" },
+      { id: 103, name: "ماسك الفحم (Charcoal Mask)", price: 3000, cat: "masks" },
+      { id: 104, name: "غسول البشرة - روح الإنعاش", price: 2000, cat: "cleansers" },
+      { id: 105, name: "كريم تجاعيد الوجه", price: 10000, cat: "creams" },
+      { id: 106, name: "كريم حب الشباب", price: 10000, cat: "creams" },
+      { id: 107, name: "كريم تفتيح البشرة", price: 10000, cat: "creams" },
+      { id: 108, name: "كريم تفتيح البقع الداكنة", price: 12000, cat: "creams" },
+      { id: 109, name: "كريم نهاري (Day Cream)", price: 15000, cat: "creams" },
+      { id: 110, name: "كريم ليلي (Night Cream)", price: 15000, cat: "creams" },
+      { id: 111, name: "كريم العناية بالأظافر", price: 12000, cat: "creams" },
+      { id: 112, name: "كريم العناية بالقدم", price: 12000, cat: "creams" },
+      { id: 113, name: "كريم خطوط الجلد", price: 12000, cat: "creams" },
+      { id: 114, name: "لوشن للجسم (Body Lotion)", price: 8000, cat: "body" },
+      { id: 115, name: "زيت عطري - جمال الطبيعة", price: 9000, cat: "oils" },
+      { id: 116, name: "زيت عطري - عود", price: 9000, cat: "oils" },
+      { id: 117, name: "زيت عطري - العطر الفرنسي", price: 9000, cat: "oils" },
+      { id: 118, name: "زيت مساج (Massage Oil)", price: 5000, cat: "oils" },
+      { id: 119, name: "سنفرة السكر - فراولة", price: 8000, cat: "scrubs" },
+      { id: 120, name: "سنفرة السكر - جمال الطبيعة", price: 8000, cat: "scrubs" },
+      { id: 121, name: "سنفرة السكر - أجمل إحساس", price: 8000, cat: "scrubs" },
+      { id: 122, name: "سنفرة الوجه مع العسل", price: 12000, cat: "scrubs" },
+      { id: 123, name: "زيت حشيشة الهليون الأخضر للشعر", price: 15000, cat: "hair" },
+      { id: 124, name: "زيت تطويل الرموش", price: 5000, cat: "hair" },
+      { id: 125, name: "شامبو خلاصة العسل والأعشاب", price: 8000, cat: "hair" },
+      { id: 126, name: "صابون الشبة والمسك والبابونج", price: 3000, cat: "soap" },
+      { id: 127, name: "صابون الحبة السوداء", price: 3000, cat: "soap" },
+      { id: 128, name: "صابون زيت الأرغان وجنين القمح", price: 3000, cat: "soap" },
+      { id: 129, name: "صابون الكركم والكبريت والعكبر", price: 3000, cat: "soap" }
+    ];
+
+    var catsJana = [
+      { id: 'all', name: 'الكل' }, { id: 'dairy', name: 'الأجبان' }, { id: 'olives', name: 'الزيتون' },
+      { id: 'drinks', name: 'الشرابات' }, { id: 'distillates', name: 'المقطرات' }, { id: 'pickles', name: 'المكدوس' },
+      { id: 'spices', name: 'زعتر وسماق' }, { id: 'vinegar', name: 'الخل والدبس' }, { id: 'jams', name: 'المربيات' }, { id: 'oils', name: 'زيت الزيتون' }
+    ];
+
+    var catsNature = [
+      { id: 'all', name: 'الكل' }, { id: 'masks', name: 'الماسكات' }, { id: 'cleansers', name: 'الغسولات' },
+      { id: 'creams', name: 'الكريمات' }, { id: 'body', name: 'العناية والجسم' }, { id: 'oils', name: 'الزيوت والروائح' },
+      { id: 'scrubs', name: 'السنفرات' }, { id: 'hair', name: 'الشعر والشامبو' }, { id: 'soap', name: 'الصابون الطبيعي' }
+    ];
+
+    var cart = [];
+    var curCat = "all";
 
     function verifyPin() {
       var val = document.getElementById("pin-input").value;
@@ -360,59 +418,30 @@ HTML_PAGE = """<!DOCTYPE html>
       }
     }
 
-    var catsJana = [
-      { id: 'all', name: 'الكل' }, { id: 'dairy', name: 'الأجبان' }, { id: 'olives', name: 'الزيتون' },
-      { id: 'drinks', name: 'الشرابات' }, { id: 'distillates', name: 'المقطرات' }, { id: 'pickles', name: 'المكدوس' },
-      { id: 'spices', name: 'زعتر وسماق' }, { id: 'vinegar', name: 'الخل والدبس' }, { id: 'jams', name: 'المربيات' }, { id: 'oils', name: 'زيت الزيتون' }
-    ];
-
-    var catsNature = [
-      { id: 'all', name: 'الكل' }, { id: 'masks', name: 'الماسكات' }, { id: 'cleansers', name: 'الغسولات' },
-      { id: 'creams', name: 'الكريمات' }, { id: 'body', name: 'العناية والجسم' }, { id: 'oils', name: 'الزيوت والروائح' },
-      { id: 'scrubs', name: 'السنفرات' }, { id: 'hair', name: 'الشعر والشامبو' }, { id: 'soap', name: 'الصابون الطبيعي' }
-    ];
-
-    var cart = [];
-    var curCat = "all";
-
-    function getActiveKey() { return (currentCompany === 'nature') ? 'nature' : 'jana'; }
-
     function getActiveMeta() {
       if (currentCompany === 'nature') {
         return {
-          name: "شركة جمال الطبيعة", subtitle: "نظام كاشير العناية والمخزون",
-          primary: "#4a154b", leaf: "#e01a4f", cats: catsNature,
-          stockEndpoint: '/get_stock_nature', saveEndpoint: '/save_nature',
-          statsEndpoint: '/stats_nature', downloadLink: '/download_nature'
+          name: "شركة جمال الطبيعة", subtitle: "نظام كاشير العناية والتجميل",
+          primary: "#4a154b", leaf: "#e01a4f", products: productsNature, cats: catsNature,
+          endpoint: '/save_nature', statsEndpoint: '/stats_nature', downloadLink: '/download_nature'
         };
       } else {
         return {
-          name: "جنى الوديان اللبنانية", subtitle: "نظام الكاشير والمخزون المباشر",
-          primary: "#14361b", leaf: "#84b53a", cats: catsJana,
-          stockEndpoint: '/get_stock_jana', saveEndpoint: '/save_jana',
-          statsEndpoint: '/stats_jana', downloadLink: '/download_jana'
+          name: "جنى الوديان اللبنانية", subtitle: "نظام الكاشير الموحد",
+          primary: "#14361b", leaf: "#84b53a", products: productsJana, cats: catsJana,
+          endpoint: '/save_jana', statsEndpoint: '/stats_jana', downloadLink: '/download_jana'
         };
       }
-    }
-
-    async function loadStock() {
-      var meta = getActiveMeta();
-      try {
-        let res = await fetch(meta.stockEndpoint);
-        let data = await res.json();
-        productsData[getActiveKey()] = data;
-        initTheme();
-        renderCats();
-        renderGrid();
-        renderCart();
-      } catch(e) {}
     }
 
     function switchCompany() {
       currentCompany = (currentCompany === 'jana') ? 'nature' : 'jana';
       localStorage.setItem('jw_active_company', currentCompany);
       cart = []; curCat = 'all';
-      loadStock();
+      initTheme();
+      renderCats();
+      renderGrid();
+      renderCart();
       if(isAdmin) fetchStats();
     }
 
@@ -425,6 +454,22 @@ HTML_PAGE = """<!DOCTYPE html>
       document.getElementById('dl-link').href = meta.downloadLink;
       document.getElementById('dl-link').innerText = "📥 إكسل " + (currentCompany === 'nature' ? 'الجمال' : 'الجنى');
       document.querySelector('.btn-switch').innerText = (currentCompany === 'jana') ? "🔄 التبديل لجمال الطبيعة" : "🔄 التبديل لجنى الوديان";
+      
+      var percentBox = document.getElementById('percent-discounts-box');
+      if (currentCompany === 'nature') {
+        percentBox.style.display = 'flex';
+      } else {
+        percentBox.style.display = 'none';
+        document.getElementById('disc').value = 0;
+      }
+    }
+
+    function applyPercentDiscount(percent) {
+      var sub = 0;
+      cart.forEach(item => { sub += (item.price * item.qty); });
+      var discountAmount = (sub * percent) / 100;
+      document.getElementById('disc').value = discountAmount;
+      renderCart();
     }
 
     function normalizeArabic(text) {
@@ -464,11 +509,11 @@ HTML_PAGE = """<!DOCTYPE html>
     }
 
     function renderGrid() {
-      var products = productsData[getActiveKey()] || [];
+      var meta = getActiveMeta();
       var g = document.getElementById("grid"); g.innerHTML = "";
       var q = normalizeArabic(document.getElementById("search-input").value.trim());
-      var list = products.filter(p => (curCat === "all" || p.cat === curCat) && (q === "" || normalizeArabic(p.name).includes(q) || p.price.toString().includes(q)));
-      document.getElementById("search-results-count").innerText = `يعرض ${list.length} من ${products.length} صنف`;
+      var list = meta.products.filter(p => (curCat === "all" || p.cat === curCat) && (q === "" || normalizeArabic(p.name).includes(q) || p.price.toString().includes(q)));
+      document.getElementById("search-results-count").innerText = `يعرض ${list.length} من ${meta.products.length} صنف`;
       
       if (list.length === 0) { 
         g.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 25px; background:#fff; border-radius:10px; color:#666;">لا توجد منتجات مطابقة..</div>'; 
@@ -478,27 +523,22 @@ HTML_PAGE = """<!DOCTYPE html>
       list.forEach(p => {
         var inCart = cart.find(i => i.id === p.id);
         var qtyBadge = inCart ? `<div class="card-badge" style="display:flex;">${inCart.qty}</div>` : `<div class="card-badge"></div>`;
-        var isOut = p.stock <= 0;
-        var stockClass = p.stock <= 3 ? "stock-info low" : "stock-info";
-        var stockText = isOut ? "⚠️ نفذ المخزون" : `المتوفر: ${p.stock} قطعة`;
-        
         var card = document.createElement("div"); 
-        card.className = "card" + (isOut ? " out-stock" : "");
-        card.innerHTML = `${qtyBadge}<div><h4>${p.name}</h4><div class="${stockClass}">${stockText}</div><div class="price">${p.price.toLocaleString()} د.ع</div></div><button class="btn-add" ${isOut ? 'disabled' : ''} onclick="addItem(${p.id})">${isOut ? 'نفذت الكمية' : '+ إضافة للفاتورة'}</button>`;
+        card.className = "card";
+        card.innerHTML = `${qtyBadge}<div><h4>${p.name}</h4><div class="price">${p.price.toLocaleString()} د.ع</div></div><button class="btn-add" onclick="addItem(${p.id})">+ إضافة للفاتورة</button>`;
         g.appendChild(card);
       });
     }
 
     function addItem(id) {
-      var products = productsData[getActiveKey()];
-      var p = products.find(x => x.id === id);
-      if (!p || p.stock <= 0) return;
+      var meta = getActiveMeta();
+      var p = meta.products.find(x => x.id === id);
+      if (!p) return;
       var found = cart.find(i => i.id === id);
       if (found) {
-        if (found.qty >= p.stock) { showToast("⚠️ الكمية تتجاوز المتوفر بالمخزون!"); return; }
         found.qty += 1;
       } else { 
-        cart.push({ id: p.id, name: p.name, price: p.price, qty: 1, maxStock: p.stock }); 
+        cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 }); 
       }
       renderCart(); renderGrid();
     }
@@ -506,9 +546,7 @@ HTML_PAGE = """<!DOCTYPE html>
     function updateQty(id, delta) {
       var item = cart.find(i => i.id === id);
       if (!item) return;
-      var newQty = item.qty + delta;
-      if (newQty > item.maxStock) { showToast("⚠️ لا يمكنك تجاوز المخزون!"); return; }
-      item.qty = newQty;
+      item.qty += delta;
       if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
       renderCart(); renderGrid();
     }
@@ -540,6 +578,32 @@ HTML_PAGE = """<!DOCTYPE html>
     function clearCart() { cart = []; document.getElementById("disc").value = 0; document.getElementById("notes").value = ""; renderCart(); renderGrid(); }
     function showToast(msg) { var t = document.getElementById("toast"); t.innerText = msg; t.style.display = "block"; setTimeout(() => { t.style.display = "none"; }, 3500); }
 
+    // دالة طباعة الفاتورة
+    function printReceipt() {
+      if (cart.length === 0) { showToast("⚠️ السلة فارغة للطباعة!"); return; }
+      var meta = getActiveMeta();
+      document.getElementById("print-comp-name").innerText = meta.name;
+      document.getElementById("print-date").innerText = new Date().toLocaleString('ar-IQ');
+      document.getElementById("print-seller").innerText = document.getElementById("seller-name").value || "كاشير عام";
+      
+      var tbody = document.getElementById("print-items-body");
+      tbody.innerHTML = "";
+      var sub = 0;
+      cart.forEach(i => {
+        var lineTotal = i.price * i.qty;
+        sub += lineTotal;
+        tbody.innerHTML += `<tr><td style="padding:4px;">${i.name}</td><td style="text-align:center; padding:4px;">${i.qty}</td><td style="text-align:left; padding:4px;">${lineTotal.toLocaleString()}</td></tr>`;
+      });
+      var disc = parseFloat(document.getElementById("disc").value) || 0;
+      var tot = Math.max(0, sub - disc);
+      
+      document.getElementById("print-sub").innerText = sub.toLocaleString() + " د.ع";
+      document.getElementById("print-disc").innerText = disc.toLocaleString() + " د.ع";
+      document.getElementById("print-tot").innerText = tot.toLocaleString() + " د.ع";
+      
+      window.print();
+    }
+
     async function fetchStats() {
       if (!isAdmin) return;
       try {
@@ -559,24 +623,26 @@ HTML_PAGE = """<!DOCTYPE html>
       cart.forEach(i => { sub += (i.price * i.qty); totalQty += i.qty; parts.push(i.name + " [×" + i.qty + "]"); });
       var disc = parseFloat(document.getElementById("disc").value) || 0;
       var payload = { 
-        seller: seller, items: cart.map(i => ({ id: i.id, qty: i.qty })),
+        seller: seller, 
         itemsText: parts.join(" | "), totalQty: totalQty, subtotal: sub, 
         discount: disc, total: Math.max(0, sub - disc), notes: document.getElementById("notes").value 
       };
       
       try {
         var meta = getActiveMeta();
-        let res = await fetch(meta.saveEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        let res = await fetch(meta.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         let data = await res.json();
         if(data.status === 'ok') {
-          showToast("✅ تم حفظ الفاتورة وخصم المخزون بنجاح!");
-          clearCart(); loadStock(); if(isAdmin) fetchStats();
-        } else { showToast("⚠️ خطأ: " + (data.msg || "غير معروف")); }
+          showToast("✅ تم حفظ الفاتورة بنجاح!");
+          clearCart(); if(isAdmin) fetchStats();
+        } else { showToast("⚠️ خطأ في الحفظ"); }
       } catch (err) { alert("خطأ في الاتصال بالسيرفر."); }
-      btn.disabled = false; btn.innerText = "💾 حفظ الفاتورة وخصم المخزون";
+      btn.disabled = false; btn.innerText = "💾 حفظ الفاتورة";
     }
 
-    loadStock();
+    initTheme();
+    renderCats();
+    renderGrid();
   </script>
 </body>
 </html>
@@ -585,14 +651,6 @@ HTML_PAGE = """<!DOCTYPE html>
 @app.route('/')
 def index():
     return Response(HTML_PAGE, mimetype='text/html')
-
-@app.route('/get_stock_jana')
-def get_stock_jana():
-    with file_lock: return jsonify(pd.read_excel(STOCK_JANA).to_dict(orient='records'))
-
-@app.route('/get_stock_nature')
-def get_stock_nature():
-    with file_lock: return jsonify(pd.read_excel(STOCK_NATURE).to_dict(orient='records'))
 
 @app.route('/stats_jana')
 def stats_jana():
@@ -607,15 +665,6 @@ def save_jana():
     now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
     inv_id = 'JW-' + datetime.now(baghdad_tz).strftime('%H%M%S')
     with file_lock:
-        df_stock = pd.read_excel(STOCK_JANA)
-        for item in data['items']:
-            idx = df_stock[df_stock['id'] == item['id']].index
-            if len(idx) > 0:
-                cur = int(df_stock.loc[idx[0], 'stock'])
-                if cur < item['qty']: return jsonify({'status': 'error', 'msg': 'الكمية غير متوفرة!'})
-                df_stock.loc[idx[0], 'stock'] = cur - item['qty']
-        df_stock.to_excel(STOCK_JANA, index=False)
-        
         new_row = {'رقم الفاتورة': inv_id, 'التاريخ والوقت': now_str, 'اسم البائع / الكاشير': data.get('seller', 'كاشير عام'), 'تفاصيل المواد المباعة': data['itemsText'], 'عدد القطع': data.get('totalQty', 1), 'المجموع الفرعي (د.ع)': data['subtotal'], 'الخصم (د.ع)': data['discount'], 'الصافي المستلم (د.ع)': data['total'], 'ملاحظات': data.get('notes') or '-'}
         df_sales = pd.read_excel(EXCEL_JANA)
         pd.concat([df_sales, pd.DataFrame([new_row])], ignore_index=True).to_excel(EXCEL_JANA, index=False)
@@ -638,15 +687,6 @@ def save_nature():
     now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
     inv_id = 'NAT-' + datetime.now(baghdad_tz).strftime('%H%M%S')
     with file_lock:
-        df_stock = pd.read_excel(STOCK_NATURE)
-        for item in data['items']:
-            idx = df_stock[df_stock['id'] == item['id']].index
-            if len(idx) > 0:
-                cur = int(df_stock.loc[idx[0], 'stock'])
-                if cur < item['qty']: return jsonify({'status': 'error', 'msg': 'الكمية غير متوفرة!'})
-                df_stock.loc[idx[0], 'stock'] = cur - item['qty']
-        df_stock.to_excel(STOCK_NATURE, index=False)
-        
         new_row = {'رقم الفاتورة': inv_id, 'التاريخ والوقت': now_str, 'اسم البائع / الكاشير': data.get('seller', 'كاشير عام'), 'تفاصيل المواد المباعة': data['itemsText'], 'عدد القطع': data.get('totalQty', 1), 'المجموع الفرعي (د.ع)': data['subtotal'], 'الخصم (د.ع)': data['discount'], 'الصافي المستلم (د.ع)': data['total'], 'ملاحظات': data.get('notes') or '-'}
         df_sales = pd.read_excel(EXCEL_NATURE)
         pd.concat([df_sales, pd.DataFrame([new_row])], ignore_index=True).to_excel(EXCEL_NATURE, index=False)
