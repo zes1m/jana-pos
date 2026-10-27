@@ -77,7 +77,6 @@ HTML_PAGE = """<!DOCTYPE html>
     
     .stats-bar { background: #e8f5e9; color: #14361b; padding: 9px 14px; border-radius: 10px; margin-bottom: 12px; font-size: 0.84rem; font-weight: bold; display: none; justify-content: space-between; flex-wrap: wrap; gap: 8px; border: 1px solid #a5d6a7; }
     
-    /* الزر المستقل لقسم الباقات المجمعة */
     .bundles-trigger-bar { margin-bottom: 12px; }
     .btn-bundles-toggle { width: 100%; padding: 13px 16px; background: linear-gradient(135deg, #d97706, #b45309); color: #fff; border: 2px solid #fde68a; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25); transition: 0.2s; }
     .btn-bundles-toggle:active { transform: scale(0.99); }
@@ -99,7 +98,6 @@ HTML_PAGE = """<!DOCTYPE html>
     .cb-row input { flex: 1; min-width: 120px; padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 0.82rem; font-weight: bold; background: #fff; }
     .btn-cb-add { background: #1e293b; color: #fff; border: none; padding: 7px 14px; border-radius: 7px; font-size: 0.82rem; font-weight: bold; cursor: pointer; }
 
-    /* قسم المصروفات */
     .expenses-section { background: #fff; border-radius: 12px; padding: 15px; border: 2px solid #e11d48; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
     .expenses-header { font-weight: bold; color: #e11d48; border-bottom: 2px solid #ffe4e6; padding-bottom: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
     .exp-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -148,10 +146,12 @@ HTML_PAGE = """<!DOCTYPE html>
     .floating-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--current-primary, #14361b); color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--current-leaf, #84b53a); z-index: 30; box-shadow: 0 -2px 10px rgba(0,0,0,0.18); }
     .floating-bar button { background: var(--current-leaf, #84b53a); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; font-size: 0.88rem; cursor: pointer; }
 
+    /* تعديل تنسيق الطباعة لضمان ظهور الفاتورة وتفادي الصفحات البيضاء */
+    #print-receipt-container { display: none; }
     @media print {
-      body * { visibility: hidden; }
-      #print-area, #print-area * { visibility: visible; }
-      #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: #fff; color: #000; direction: rtl; }
+      body * { display: none !important; }
+      #print-receipt-container, #print-receipt-container * { display: block !important; visibility: visible !important; }
+      #print-receipt-container { position: absolute; left: 0; top: 0; width: 100%; padding: 15px; background: #fff; color: #000; direction: rtl; font-size: 14px; }
     }
   </style>
 </head>
@@ -301,34 +301,34 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- منطقة الفاتورة الخفية المخصصة للطباعة -->
-  <div id="print-area" style="display:none;">
-    <div style="text-align:center; margin-bottom:15px;">
-      <h2 id="print-comp-name" style="font-size:1.4rem; margin-bottom:4px;"></h2>
-      <p style="font-size:0.85rem; color:#555;">إيصال مبيعات رسمي</p>
-      <hr style="border:0; border-top:1px dashed #000; margin:8px 0;">
+  <!-- منطقة الفاتورة المخصصة للطباعة -->
+  <div id="print-receipt-container">
+    <div style="text-align:center; margin-bottom:12px;">
+      <h2 id="p-comp" style="font-size:16px; font-weight:bold; margin-bottom:4px;"></h2>
+      <p style="font-size:12px; color:#333;">إيصال مبيعات رسمي</p>
+      <hr style="border:0; border-top:1px dashed #000; margin:6px 0;">
     </div>
-    <div style="font-size:0.9rem; margin-bottom:10px;">
-      <div><strong>التاريخ:</strong> <span id="print-date"></span></div>
-      <div><strong>البائع/الكاشير:</strong> <span id="print-seller"></span></div>
+    <div style="font-size:12px; margin-bottom:8px;">
+      <div><strong>التاريخ:</strong> <span id="p-date"></span></div>
+      <div><strong>البائع:</strong> <span id="p-seller"></span></div>
     </div>
-    <table style="width:100%; border-collapse:collapse; font-size:0.88rem; margin-bottom:10px;">
+    <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:8px;">
       <thead>
         <tr style="border-bottom:1px solid #000;">
-          <th style="text-align:right; padding:4px;">المادة / الباقة</th>
-          <th style="text-align:center; padding:4px;">الكمية</th>
-          <th style="text-align:left; padding:4px;">المجموع</th>
+          <th style="text-align:right; padding:3px;">المادة / الباقة</th>
+          <th style="text-align:center; padding:3px;">الكمية</th>
+          <th style="text-align:left; padding:3px;">المجموع</th>
         </tr>
       </thead>
-      <tbody id="print-items-body"></tbody>
+      <tbody id="p-items"></tbody>
     </table>
-    <hr style="border:0; border-top:1px dashed #000; margin:8px 0;">
-    <div style="font-size:0.9rem;">
-      <div style="display:flex; justify-content:space-between;"><span>المجموع الفرعي:</span> <span id="print-sub"></span></div>
-      <div style="display:flex; justify-content:space-between;"><span>الخصم:</span> <span id="print-disc"></span></div>
-      <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.1rem; margin-top:5px;"><span>الصافي المطلوب:</span> <span id="print-tot"></span></div>
+    <hr style="border:0; border-top:1px dashed #000; margin:6px 0;">
+    <div style="font-size:12px;">
+      <div style="display:flex; justify-content:space-between;"><span>المجموع الفرعي:</span> <span id="p-sub"></span></div>
+      <div style="display:flex; justify-content:space-between;"><span>الخصم:</span> <span id="p-disc"></span></div>
+      <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-top:4px;"><span>الصافي المطلوب:</span> <span id="p-tot"></span></div>
     </div>
-    <div style="text-align:center; margin-top:20px; font-size:0.8rem; color:#555;">
+    <div style="text-align:center; margin-top:15px; font-size:11px;">
       <p>شكراً لزيارتكم!</p>
       <p>تصميم: مصطفى عبد الرزاق</p>
     </div>
@@ -450,7 +450,6 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 129, name: "صابون الكركم والكبريت والعكبر", price: 3000, cat: "soap" }
     ];
 
-    /* الباقات المجمعة الافتراضية لكل شركة */
     var defaultBundlesJana = [
       { id: 901, name: "🎁 باقة الفطور اللبناني الملكي", items: "لبنة كرات + جبنة حبة البركة + زعتر اكسترا + زيت زيتون 500مل + زيتون مشوي", oldPrice: 41000, price: 35000 },
       { id: 902, name: "🎁 باقة المونة العائلية الشاملة", items: "زيت زيتون 3 لتر + مكدوس بالجوز + لبنة سادة + دبس رمان زجاجي + مربى التين", oldPrice: 57000, price: 50000 },
@@ -794,24 +793,24 @@ HTML_PAGE = """<!DOCTYPE html>
     function printReceipt() {
       if (cart.length === 0) { showToast("⚠️ السلة فارغة للطباعة!"); return; }
       var meta = getActiveMeta();
-      document.getElementById("print-comp-name").innerText = meta.name;
-      document.getElementById("print-date").innerText = new Date().toLocaleString('ar-IQ');
-      document.getElementById("print-seller").innerText = document.getElementById("seller-name").value || "كاشير عام";
+      document.getElementById("p-comp").innerText = meta.name;
+      document.getElementById("p-date").innerText = new Date().toLocaleString('ar-IQ');
+      document.getElementById("p-seller").innerText = document.getElementById("seller-name").value || "كاشير عام";
       
-      var tbody = document.getElementById("print-items-body");
+      var tbody = document.getElementById("p-items");
       tbody.innerHTML = "";
       var sub = 0;
       cart.forEach(i => {
         var lineTotal = i.price * i.qty;
         sub += lineTotal;
-        tbody.innerHTML += `<tr><td style="padding:4px;">${i.name}</td><td style="text-align:center; padding:4px;">${i.qty}</td><td style="text-align:left; padding:4px;">${lineTotal.toLocaleString()}</td></tr>`;
+        tbody.innerHTML += `<tr><td style="padding:3px;">${i.name}</td><td style="text-align:center; padding:3px;">${i.qty}</td><td style="text-align:left; padding:3px;">${lineTotal.toLocaleString()}</td></tr>`;
       });
       var disc = parseFloat(document.getElementById("disc").value) || 0;
       var tot = Math.max(0, sub - disc);
       
-      document.getElementById("print-sub").innerText = sub.toLocaleString() + " د.ع";
-      document.getElementById("print-disc").innerText = disc.toLocaleString() + " د.ع";
-      document.getElementById("print-tot").innerText = tot.toLocaleString() + " د.ع";
+      document.getElementById("p-sub").innerText = sub.toLocaleString() + " د.ع";
+      document.getElementById("p-disc").innerText = disc.toLocaleString() + " د.ع";
+      document.getElementById("p-tot").innerText = tot.toLocaleString() + " د.ع";
       
       window.print();
     }
@@ -960,6 +959,7 @@ def save_nature():
         pd.concat([df_sales, pd.DataFrame([new_row])], ignore_index=True).to_excel(EXCEL_NATURE, index=False)
     return jsonify({'status': 'ok', 'invoice_id': inv_id})
 
+@app.route('/save_expense_nature', methods=['`POST`']) # type: ignore
 @app.route('/save_expense_nature', methods=['POST'])
 def save_expense_nature():
     data = request.json
