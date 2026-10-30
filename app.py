@@ -146,7 +146,6 @@ HTML_PAGE = """<!DOCTYPE html>
     .floating-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--current-primary, #14361b); color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--current-leaf, #84b53a); z-index: 30; box-shadow: 0 -2px 10px rgba(0,0,0,0.18); }
     .floating-bar button { background: var(--current-leaf, #84b53a); color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; font-size: 0.88rem; cursor: pointer; }
 
-    /* تعديل تنسيق الطباعة لضمان ظهور الفاتورة وتفادي الصفحات البيضاء */
     #print-receipt-container { display: none; }
     @media print {
       body * { display: none !important; }
@@ -197,7 +196,6 @@ HTML_PAGE = """<!DOCTYPE html>
       <span id="stat-exp" style="color:#b91c1c;">إجمالي المصاريف: 0 د.ع</span>
     </div>
 
-    <!-- قسم تسجيل المصروفات اليومية (للأدمن) -->
     <div class="expenses-section" id="expenses-section" style="display:none;">
       <div class="expenses-header">
         <span>💸 تسجيل مصرف / مصروف يومي جديد</span>
@@ -220,7 +218,6 @@ HTML_PAGE = """<!DOCTYPE html>
       <div id="exp-toast"></div>
     </div>
 
-    <!-- الزر المستقل لقسم الباقات المجمعة -->
     <div class="bundles-trigger-bar">
       <button class="btn-bundles-toggle" onclick="toggleBundlesSection()">
         <span>🎁 قسم الباقات والعروض المجمعة (عروض المعرض)</span>
@@ -228,7 +225,6 @@ HTML_PAGE = """<!DOCTYPE html>
       </button>
     </div>
 
-    <!-- نافذة الباقات المجمعة المستقلة -->
     <div class="bundles-section" id="bundles-section">
       <div class="bundles-header">
         <h3 id="bundles-section-title">🎁 الباقات الذهبية المجمعة</h3>
@@ -236,7 +232,6 @@ HTML_PAGE = """<!DOCTYPE html>
       </div>
       <div class="bundles-grid" id="bundles-grid"></div>
 
-      <!-- إنشاء باقة فورية مخصصة -->
       <div class="custom-bundle-box">
         <h5>✨ إنشاء أو إضافة باقة فورية خاصة للزبون:</h5>
         <div class="cb-row">
@@ -301,7 +296,6 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- منطقة الفاتورة المخصصة للطباعة -->
   <div id="print-receipt-container">
     <div style="text-align:center; margin-bottom:12px;">
       <h2 id="p-comp" style="font-size:16px; font-weight:bold; margin-bottom:4px;"></h2>
@@ -433,21 +427,24 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 112, name: "كريم العناية بالقدم", price: 12000, cat: "creams" },
       { id: 113, name: "كريم خطوط الجلد", price: 12000, cat: "creams" },
       { id: 114, name: "لوشن للجسم (Body Lotion)", price: 8000, cat: "body" },
-      { id: 115, name: "زيت عطري - جمال الطبيعة", price: 9000, cat: "oils" },
-      { id: 116, name: "زيت عطري - عود", price: 9000, cat: "oils" },
-      { id: 117, name: "زيت عطري - العطر الفرنسي", price: 9000, cat: "oils" },
-      { id: 118, name: "زيت مساج (Massage Oil)", price: 5000, cat: "oils" },
-      { id: 119, name: "سنفرة السكر - فراولة", price: 8000, cat: "scrubs" },
-      { id: 120, name: "سنفرة السكر - جمال الطبيعة", price: 8000, cat: "scrubs" },
-      { id: 121, name: "سنفرة السكر - أجمل إحساس", price: 8000, cat: "scrubs" },
-      { id: 122, name: "سنفرة الوجه مع العسل", price: 12000, cat: "scrubs" },
-      { id: 123, name: "زيت حشيشة الهليون الأخضر للشعر", price: 15000, cat: "hair" },
-      { id: 124, name: "زيت تطويل الرموش", price: 5000, cat: "hair" },
-      { id: 125, name: "شامبو خلاصة العسل والأعشاب", price: 8000, cat: "hair" },
-      { id: 126, name: "صابون الشبة والمسك والبابونج", price: 3000, cat: "soap" },
-      { id: 127, name: "صابون الحبة السوداء", price: 3000, cat: "soap" },
-      { id: 128, name: "صابون زيت الأرغان وجنين القمح", price: 3000, cat: "soap" },
-      { id: 129, name: "صابون الكركم والكبريت والعكبر", price: 3000, cat: "soap" }
+      { id: 115, name: "لوشن - فراولة", price: 3000, cat: "body" },
+      { id: 116, name: "لوشن - عود", price: 3000, cat: "body" },
+      { id: 117, name: "لوشن - العطر الفرنسي", price: 3000, cat: "body" },
+      { id: 118, name: "زيت عطري - جمال الطبيعة", price: 9000, cat: "oils" },
+      { id: 119, name: "زيت عطري - عود", price: 9000, cat: "oils" },
+      { id: 120, name: "زيت عطري - العطر الفرنسي", price: 9000, cat: "oils" },
+      { id: 121, name: "زيت مساج (Massage Oil)", price: 5000, cat: "oils" },
+      { id: 122, name: "سنفرة السكر - فراولة", price: 8000, cat: "scrubs" },
+      { id: 123, name: "سنفرة السكر - جمال الطبيعة", price: 8000, cat: "scrubs" },
+      { id: 124, name: "سنفرة السكر - أجمل إحساس", price: 8000, cat: "scrubs" },
+      { id: 125, name: "سنفرة الوجه مع العسل", price: 12000, cat: "scrubs" },
+      { id: 126, name: "زيت حشيشة الهليون الأخضر للشعر", price: 15000, cat: "hair" },
+      { id: 127, name: "زيت تطويل الرموش", price: 5000, cat: "hair" },
+      { id: 128, name: "شامبو خلاصة العسل والأعشاب", price: 8000, cat: "hair" },
+      { id: 129, name: "صابون الشبة والمسك والبابونج", price: 3000, cat: "soap" },
+      { id: 130, name: "صابون الحبة السوداء", price: 3000, cat: "soap" },
+      { id: 131, name: "صابون زيت الأرغان وجنين القمح", price: 3000, cat: "soap" },
+      { id: 132, name: "صابون الكركم والكبريت والعكبر", price: 3000, cat: "soap" }
     ];
 
     var defaultBundlesJana = [
@@ -959,7 +956,6 @@ def save_nature():
         pd.concat([df_sales, pd.DataFrame([new_row])], ignore_index=True).to_excel(EXCEL_NATURE, index=False)
     return jsonify({'status': 'ok', 'invoice_id': inv_id})
 
-@app.route('/save_expense_nature', methods=['`POST`']) # type: ignore
 @app.route('/save_expense_nature', methods=['POST'])
 def save_expense_nature():
     data = request.json
