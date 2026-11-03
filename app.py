@@ -360,7 +360,7 @@ HTML_PAGE = """<!DOCTYPE html>
     var ADMIN_PIN = "2026"; 
     var isAdmin = false;
 
-    localStorage.removeItem('custom_bundles_nature_v3');
+    localStorage.removeItem('custom_bundles_jana_v4');
 
     document.getElementById('seller-name').value = localStorage.getItem('active_seller') || '';
     var currentCompany = localStorage.getItem('jw_active_company') || 'jana';
@@ -469,18 +469,20 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 132, name: "صابون الكركم والكبريت والعكبر", price: 3000, cat: "soap" }
     ];
 
+    /* عروض جنى الوديان الجديدة (باقة المقطرات السبعة وعرض الفطور البلدي) */
     var defaultBundlesJana = [
+      { id: 911, name: "🎁 باقة المقطرات العضوية السبعة", items: "ماء الزهر + ماء الشمار + ماء الزلوع + ماء الورد + ماء الزعتر + ماء الميرمية القصعين + ماء النعناع", oldPrice: 21000, price: 15000 },
+      { id: 912, name: "🎁 عرض الفطور البلدي المميز", items: "لبنة كرات صغير + زيتون سادة", oldPrice: 13000, price: 12000 },
       { id: 901, name: "🎁 باقة الفطور اللبناني الملكي", items: "لبنة كرات + جبنة حبة البركة + زعتر اكسترا + زيت زيتون 500مل + زيتون مشوي", oldPrice: 41000, price: 35000 },
       { id: 902, name: "🎁 باقة المونة العائلية الشاملة", items: "زيت زيتون 3 لتر + مكدوس بالجوز + لبنة سادة + دبس رمان زجاجي + مربى التين", oldPrice: 57000, price: 50000 },
       { id: 903, name: "🎁 باقة الضيافة والمقبلات", items: "مكدوس محشي لبنة + زيتون محشي لبنة + كبيس كورنيشون + زعتر بالصنوبر + سماق", oldPrice: 35000, price: 30000 },
-      { id: 904, name: "🎁 باقة الشرابات والمقطرات", items: "شراب الورد + شراب التوت + شراب الرمان + ماء الورد العضوي + ماء الزهر العضوي", oldPrice: 18000, price: 15000 },
       { id: 905, name: "🎁 باقة التوفير الكبرى VIP", items: "زيت زيتون 10 لتر + زعتر اكسترا لبناني + دبس رمان زجاجي + مربى المشمش", oldPrice: 115000, price: 100000 }
     ];
 
     var defaultBundlesNature = [
       { id: 961, name: "🎁 بكج العناية بالشعر الكامل", items: "سيروم الشعر + شامبو خلاصة الأعشاب والعسل + زيت الهليون الأخضر", oldPrice: 68000, price: 25000 },
       { id: 962, name: "🎁 بكج الانتعاش والعناية بالبشرة", items: "لوشن واحد حسب الاختيار + غسول البشرة روح الإنعاش + سنفرة الوجه", oldPrice: 17000, price: 10000 },
-      { id: 963, name: "🎁 بكج تفتيح البقع والصفاء", items: "كريم تفتيح البقع الداكنة + صابون الكركم والعكبر + لوشن الفراولة", oldPrice: 18000, price: 15000 },
+      { id: 963, name: "🎁 بكج تفتيح البقع والصفاء", items: "كريم تفتيح البقع الداكنة + صابون الكركم والكبريت + لوشن الفراولة", oldPrice: 18000, price: 15000 },
       { id: 964, name: "🎁 عرض الصابون الطبيعي (اشتري 2 بـ 5 آلاف واحصل على الثالثة مجاناً)", items: "3 قطع صابون طبيعي حسب الاختيار (قطعتان بسعر 5 آلاف والثالثة مجاناً)", oldPrice: 9000, price: 5000 }
     ];
 
@@ -556,8 +558,8 @@ HTML_PAGE = """<!DOCTYPE html>
     }
 
     function getActiveMeta() {
-      var customJana = JSON.parse(localStorage.getItem('custom_bundles_jana_v3') || '[]');
-      var customNature = JSON.parse(localStorage.getItem('custom_bundles_nature_v3') || '[]');
+      var customJana = JSON.parse(localStorage.getItem('custom_bundles_jana_v4') || '[]');
+      var customNature = JSON.parse(localStorage.getItem('custom_bundles_nature_v4') || '[]');
 
       if (currentCompany === 'nature') {
         return {
@@ -652,7 +654,7 @@ HTML_PAGE = """<!DOCTYPE html>
         oldPrice: 0,
         price: price
       };
-      var storageKey = (currentCompany === 'nature') ? 'custom_bundles_nature_v3' : 'custom_bundles_jana_v3';
+      var storageKey = (currentCompany === 'nature') ? 'custom_bundles_nature_v4' : 'custom_bundles_jana_v4';
       var existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
       existing.push(newBundle);
       localStorage.setItem(storageKey, JSON.stringify(existing));
