@@ -16,7 +16,6 @@ file_lock = threading.Lock()
 baghdad_tz = timezone(timedelta(hours=3))
 
 def get_active_cutoff():
-    """إرجاع وقت بداية الحساب الحالي: يتصفر تلقائياً كل 24 ساعة (بداية اليوم بتوقيت بغداد) أو عند التصفير اليدوي"""
     now_bg = datetime.now(baghdad_tz)
     daily_start = now_bg.strftime('%Y-%m-%d 00:00:00')
     if os.path.exists(RESET_FILE):
@@ -361,7 +360,6 @@ HTML_PAGE = """<!DOCTYPE html>
     var ADMIN_PIN = "2026"; 
     var isAdmin = false;
 
-    // مسح أي باقات قديمة محفوظة في المتصفح لجمال الطبيعة لضمان ظهور العروض الجديدة فقط
     localStorage.removeItem('custom_bundles_nature');
 
     document.getElementById('seller-name').value = localStorage.getItem('active_seller') || '';
@@ -434,7 +432,6 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 64, name: "لبنة كرات بالشطة 600 غرام", price: 8000, cat: "dairy" }
     ];
 
-    /* منتجات جمال الطبيعة بعد تعديل أسعار العروض الجديدة */
     var productsNature = [
       { id: 100, name: "سيروم الشعر المغذي (عرض 15 بدل 45)", price: 15000, cat: "hair" },
       { id: 128, name: "شامبو خلاصة العسل والأعشاب (عرض 5 بدل 8)", price: 5000, cat: "hair" },
@@ -479,7 +476,6 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 905, name: "🎁 باقة التوفير الكبرى VIP", items: "زيت زيتون 10 لتر + زعتر اكسترا لبناني + دبس رمان زجاجي + مربى المشمش", oldPrice: 115000, price: 100000 }
     ];
 
-    /* البكجات الجديدة لشركة جمال الطبيعة بعد حذف القديمة */
     var defaultBundlesNature = [
       { id: 961, name: "🎁 بكج العناية بالشعر الكامل", items: "سيروم الشعر + شامبو خلاصة الأعشاب والعسل + زيت الهليون الأخضر", oldPrice: 68000, price: 25000 },
       { id: 962, name: "🎁 بكج الانتعاش والعناية بالبشرة", items: "لوشن واحد حسب الاختيار + غسول البشرة روح الإنعاش + سنفرة الوجه", oldPrice: 17000, price: 10000 },
@@ -863,7 +859,6 @@ HTML_PAGE = """<!DOCTYPE html>
       } catch(e) { alert("خطأ في الاتصال بالسيرفر"); }
     }
 
-    // تحديث تلقائي للإحصائيات كل دقيقة للتحقق من تصفير الـ 24 ساعة
     setInterval(() => { if(isAdmin) fetchStats(); }, 60000);
 
     async function submitExpense() {
