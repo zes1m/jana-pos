@@ -360,7 +360,7 @@ HTML_PAGE = """<!DOCTYPE html>
     var ADMIN_PIN = "2026"; 
     var isAdmin = false;
 
-    localStorage.removeItem('custom_bundles_nature_v2');
+    localStorage.removeItem('custom_bundles_nature_v3');
 
     document.getElementById('seller-name').value = localStorage.getItem('active_seller') || '';
     var currentCompany = localStorage.getItem('jw_active_company') || 'jana';
@@ -429,7 +429,8 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 61, name: "لبنة كرات سادة 600 غرام", price: 8000, cat: "dairy" },
       { id: 62, name: "لبنة كرات بالزعتر 600 غرام", price: 8000, cat: "dairy" },
       { id: 63, name: "لبنة كرات بالنعنع 600 غرام", price: 8000, cat: "dairy" },
-      { id: 64, name: "لبنة كرات بالشطة 600 غرام", price: 8000, cat: "dairy" }
+      { id: 64, name: "لبنة كرات بالشطة 600 غرام", price: 8000, cat: "dairy" },
+      { id: 65, name: "لبنة كرات صغير", price: 5000, cat: "dairy" }
     ];
 
     var productsNature = [
@@ -476,7 +477,6 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 905, name: "🎁 باقة التوفير الكبرى VIP", items: "زيت زيتون 10 لتر + زعتر اكسترا لبناني + دبس رمان زجاجي + مربى المشمش", oldPrice: 115000, price: 100000 }
     ];
 
-    /* البكجات المحدثة لجمال الطبيعة متضمنة عرض الصابون الجديد */
     var defaultBundlesNature = [
       { id: 961, name: "🎁 بكج العناية بالشعر الكامل", items: "سيروم الشعر + شامبو خلاصة الأعشاب والعسل + زيت الهليون الأخضر", oldPrice: 68000, price: 25000 },
       { id: 962, name: "🎁 بكج الانتعاش والعناية بالبشرة", items: "لوشن واحد حسب الاختيار + غسول البشرة روح الإنعاش + سنفرة الوجه", oldPrice: 17000, price: 10000 },
