@@ -10,7 +10,24 @@ EXCEL_JANA = 'مبيعات_جنى_الوديان_الموحد.xlsx'
 EXCEL_NATURE = 'مبيعات_جمال_الطبيعة.xlsx'
 EXPENSES_JANA = 'مصروفات_جنى_الوديان.xlsx'
 EXPENSES_NATURE = 'مصروفات_جمال_الطبيعة.xlsx'
+RESET_FILE = 'last_reset.txt'
 file_lock = threading.Lock()
+
+baghdad_tz = timezone(timedelta(hours=3))
+
+def get_active_cutoff():
+    """إرجاع وقت بداية الحساب الحالي: يتصفر تلقائياً كل 24 ساعة (بداية اليوم بتوقيت بغداد) أو عند التصفير اليدوي"""
+    now_bg = datetime.now(baghdad_tz)
+    daily_start = now_bg.strftime('%Y-%m-%d 00:00:00')
+    if os.path.exists(RESET_FILE):
+        try:
+            with open(RESET_FILE, 'r', encoding='utf-8') as f:
+                manual_reset = f.read().strip()
+            if manual_reset > daily_start:
+                return manual_reset
+        except Exception:
+            pass
+    return daily_start
 
 with file_lock:
     if not os.path.exists(EXCEL_JANA):
@@ -66,7 +83,7 @@ HTML_PAGE = """<!DOCTYPE html>
     .brand-title span { font-size: 0.82rem; color: #555; font-weight: bold; }
     .actions-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .btn-switch { background: var(--current-primary, #14361b); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .btn-dl { background: #334155; color: #fff; text-decoration: none; padding: 8px 10px; border-radius: 8px; font-weight: bold; font-size: 0.78rem; display: none; align-items: center; gap: 4px; }
+    .btn-dl { background: #334155; color: #fff; text-decoration: none; padding: 8px 10px; border-radius: 8px; font-weight: bold; font-size: 0.75rem; display: none; align-items: center; gap: 4px; border: none; cursor: pointer; }
     
     .container { padding: 12px; max-width: 920px; margin: auto; }
     .top-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; justify-content: space-between; align-items: center; }
@@ -75,7 +92,8 @@ HTML_PAGE = """<!DOCTYPE html>
     .seller-box input { flex: 1; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-weight: bold; font-size: 0.88rem; }
     .admin-badge { background: #fef3c7; color: #d97706; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; border: 1px solid #fde68a; display: flex; align-items: center; gap: 6px; cursor: pointer; }
     
-    .stats-bar { background: #e8f5e9; color: #14361b; padding: 9px 14px; border-radius: 10px; margin-bottom: 12px; font-size: 0.84rem; font-weight: bold; display: none; justify-content: space-between; flex-wrap: wrap; gap: 8px; border: 1px solid #a5d6a7; }
+    .stats-bar { background: #e8f5e9; color: #14361b; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; font-size: 0.84rem; font-weight: bold; display: none; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border: 1px solid #a5d6a7; }
+    .btn-reset-day { background: #dc2626; color: #fff; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
     
     .bundles-trigger-bar { margin-bottom: 12px; }
     .btn-bundles-toggle { width: 100%; padding: 13px 16px; background: linear-gradient(135deg, #d97706, #b45309); color: #fff; border: 2px solid #fde68a; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25); transition: 0.2s; }
@@ -171,12 +189,13 @@ HTML_PAGE = """<!DOCTYPE html>
     <div class="brand-box">
       <div class="brand-title">
         <h1 id="app-title">جنى الوديان اللبنانية</h1>
-        <span id="app-subtitle">نظام الكاشير الذكي</span>
+        <span id="app-subtitle">نظام الكاشير الذكي (حساب يتصفر كل 24 ساعة)</span>
       </div>
     </div>
     <div class="actions-top">
       <button class="btn-switch" onclick="switchCompany()">🔄 التبديل للثانية</button>
-      <a href="#" id="dl-link" class="btn-dl">📥 إكسل المبيعات</a>
+      <a href="#" id="dl-link" class="btn-dl" style="background:#0f766e;">📥 إكسل اليوم (24س)</a>
+      <a href="#" id="dl-all-link" class="btn-dl">📂 السجل الشامل</a>
       <a href="#" id="dl-exp-link" class="btn-dl" style="background:#b91c1c;">📥 إكسل المصاريف</a>
     </div>
   </div>
@@ -191,9 +210,10 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
 
     <div class="stats-bar" id="stats-box">
-      <span id="stat-total">إجمالي المبيعات: 0 د.ع</span>
-      <span id="stat-count">عدد الفواتير: 0</span>
-      <span id="stat-exp" style="color:#b91c1c;">إجمالي المصاريف: 0 د.ع</span>
+      <span id="stat-total">مبيعات اليوم (24س): 0 د.ع</span>
+      <span id="stat-count">فواتير اليوم: 0</span>
+      <span id="stat-exp" style="color:#b91c1c;">مصاريف اليوم: 0 د.ع</span>
+      <button class="btn-reset-day" onclick="resetDailyCounter()">🔄 تصفير وبدء حساب جديد</button>
     </div>
 
     <div class="expenses-section" id="expenses-section" style="display:none;">
@@ -341,6 +361,9 @@ HTML_PAGE = """<!DOCTYPE html>
     var ADMIN_PIN = "2026"; 
     var isAdmin = false;
 
+    // مسح أي باقات قديمة محفوظة في المتصفح لجمال الطبيعة لضمان ظهور العروض الجديدة فقط
+    localStorage.removeItem('custom_bundles_nature');
+
     document.getElementById('seller-name').value = localStorage.getItem('active_seller') || '';
     var currentCompany = localStorage.getItem('jw_active_company') || 'jana';
 
@@ -411,8 +434,12 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 64, name: "لبنة كرات بالشطة 600 غرام", price: 8000, cat: "dairy" }
     ];
 
+    /* منتجات جمال الطبيعة بعد تعديل أسعار العروض الجديدة */
     var productsNature = [
-      { id: 100, name: "سيروم الشعر المغذي", price: 45000, cat: "hair" },
+      { id: 100, name: "سيروم الشعر المغذي (عرض 15 بدل 45)", price: 15000, cat: "hair" },
+      { id: 128, name: "شامبو خلاصة العسل والأعشاب (عرض 5 بدل 8)", price: 5000, cat: "hair" },
+      { id: 126, name: "زيت حشيشة الهليون الأخضر للشعر (عرض)", price: 5000, cat: "hair" },
+      { id: 127, name: "زيت تطويل الرموش", price: 5000, cat: "hair" },
       { id: 101, name: "ماسك الذهب (Gold Mask)", price: 3000, cat: "masks" },
       { id: 102, name: "ماسك الألويفيرا (Aloe Vera Mask)", price: 3000, cat: "masks" },
       { id: 103, name: "ماسك الفحم (Charcoal Mask)", price: 3000, cat: "masks" },
@@ -438,9 +465,6 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 123, name: "سنفرة السكر - جمال الطبيعة", price: 8000, cat: "scrubs" },
       { id: 124, name: "سنفرة السكر - أجمل إحساس", price: 8000, cat: "scrubs" },
       { id: 125, name: "سنفرة الوجه مع العسل", price: 12000, cat: "scrubs" },
-      { id: 126, name: "زيت حشيشة الهليون الأخضر للشعر", price: 15000, cat: "hair" },
-      { id: 127, name: "زيت تطويل الرموش", price: 5000, cat: "hair" },
-      { id: 128, name: "شامبو خلاصة العسل والأعشاب", price: 8000, cat: "hair" },
       { id: 129, name: "صابون الشبة والمسك والبابونج", price: 3000, cat: "soap" },
       { id: 130, name: "صابون الحبة السوداء", price: 3000, cat: "soap" },
       { id: 131, name: "صابون زيت الأرغان وجنين القمح", price: 3000, cat: "soap" },
@@ -455,12 +479,11 @@ HTML_PAGE = """<!DOCTYPE html>
       { id: 905, name: "🎁 باقة التوفير الكبرى VIP", items: "زيت زيتون 10 لتر + زعتر اكسترا لبناني + دبس رمان زجاجي + مربى المشمش", oldPrice: 115000, price: 100000 }
     ];
 
+    /* البكجات الجديدة لشركة جمال الطبيعة بعد حذف القديمة */
     var defaultBundlesNature = [
-      { id: 951, name: "🎁 باقة العناية المتكاملة بالشعر VIP", items: "سيروم الشعر المغذي + زيت الهليون الأخضر + شامبو العسل والأعشاب + زيت الرموش", oldPrice: 73000, price: 55000 },
-      { id: 952, name: "🎁 باقة الإشراقة الملكية للبشرة", items: "كريم نهاري + كريم ليلي + سنفرة الوجه بالعسل + غسول البشرة + ماسك الذهب", oldPrice: 47000, price: 35000 },
-      { id: 953, name: "🎁 باقة العروس للجسم والتعطير", items: "لوشن الجسم + سنفرة السكر فراولة + زيت عطري عود + زيت عطري فرنسي + زيت مساج", oldPrice: 39000, price: 30000 },
-      { id: 954, name: "🎁 باقة الصفاء وعلاج البشرة", items: "كريم حب الشباب + كريم تفتيح البقع + ماسك الفحم + صابون الكركم والكبريت", oldPrice: 28000, price: 22000 },
-      { id: 955, name: "🎁 باقة الصابون والماسكات (7 قطع)", items: "4 أنواع صابون طبيعي + 3 ماسكات (الذهب والألويفيرا والفحم)", oldPrice: 21000, price: 15000 }
+      { id: 961, name: "🎁 بكج العناية بالشعر الكامل", items: "سيروم الشعر + شامبو خلاصة الأعشاب والعسل + زيت الهليون الأخضر", oldPrice: 68000, price: 25000 },
+      { id: 962, name: "🎁 بكج الانتعاش والعناية بالبشرة", items: "لوشن واحد حسب الاختيار + غسول البشرة روح الإنعاش + سنفرة الوجه", oldPrice: 17000, price: 10000 },
+      { id: 963, name: "🎁 بكج تفتيح البقع والصفاء", items: "كريم تفتيح البقع الداكنة + صابون الكركم والعكبر + لوشن الفراولة", oldPrice: 18000, price: 15000 }
     ];
 
     var catsJana = [
@@ -470,9 +493,9 @@ HTML_PAGE = """<!DOCTYPE html>
     ];
 
     var catsNature = [
-      { id: 'all', name: 'الكل' }, { id: 'masks', name: 'الماسكات' }, { id: 'cleansers', name: 'الغسولات' },
-      { id: 'creams', name: 'الكريمات' }, { id: 'body', name: 'العناية والجسم' }, { id: 'oils', name: 'الزيوت والروائح' },
-      { id: 'scrubs', name: 'السنفرات' }, { id: 'hair', name: 'الشعر والشامبو' }, { id: 'soap', name: 'الصابون الطبيعي' }
+      { id: 'all', name: 'الكل' }, { id: 'hair', name: 'الشعر والشامبو' }, { id: 'masks', name: 'الماسكات' },
+      { id: 'cleansers', name: 'الغسولات' }, { id: 'creams', name: 'الكريمات' }, { id: 'body', name: 'اللوشن والجسم' },
+      { id: 'oils', name: 'الزيوت والروائح' }, { id: 'scrubs', name: 'السنفرات' }, { id: 'soap', name: 'الصابون الطبيعي' }
     ];
 
     var cart = [];
@@ -506,6 +529,7 @@ HTML_PAGE = """<!DOCTYPE html>
     function applyRolePermissions() {
       var badge = document.getElementById("role-badge");
       var dlBtn = document.getElementById("dl-link");
+      var dlAllBtn = document.getElementById("dl-all-link");
       var dlExpBtn = document.getElementById("dl-exp-link");
       var statsBox = document.getElementById("stats-box");
       var expSection = document.getElementById("expenses-section");
@@ -516,6 +540,7 @@ HTML_PAGE = """<!DOCTYPE html>
         badge.style.color = "#166534";
         badge.style.borderColor = "#86efac";
         dlBtn.style.display = "flex";
+        dlAllBtn.style.display = "flex";
         dlExpBtn.style.display = "flex";
         statsBox.style.display = "flex";
         expSection.style.display = "block";
@@ -525,6 +550,7 @@ HTML_PAGE = """<!DOCTYPE html>
         badge.style.color = "#d97706";
         badge.style.borderColor = "#fde68a";
         dlBtn.style.display = "none";
+        dlAllBtn.style.display = "none";
         dlExpBtn.style.display = "none";
         statsBox.style.display = "none";
         expSection.style.display = "none";
@@ -532,23 +558,25 @@ HTML_PAGE = """<!DOCTYPE html>
     }
 
     function getActiveMeta() {
-      var customJana = JSON.parse(localStorage.getItem('custom_bundles_jana') || '[]');
-      var customNature = JSON.parse(localStorage.getItem('custom_bundles_nature') || '[]');
+      var customJana = JSON.parse(localStorage.getItem('custom_bundles_jana_v2') || '[]');
+      var customNature = JSON.parse(localStorage.getItem('custom_bundles_nature_v2') || '[]');
 
       if (currentCompany === 'nature') {
         return {
-          name: "شركة جمال الطبيعة", subtitle: "نظام كاشير العناية والتجميل",
+          name: "شركة جمال الطبيعة", subtitle: "نظام كاشير العناية والتجميل (حساب 24 ساعة)",
           primary: "#4a154b", leaf: "#e01a4f", products: productsNature, cats: catsNature,
           bundles: defaultBundlesNature.concat(customNature),
-          endpoint: '/save_nature', statsEndpoint: '/stats_nature', downloadLink: '/download_nature',
+          endpoint: '/save_nature', statsEndpoint: '/stats_nature',
+          downloadDailyLink: '/download_daily_nature', downloadAllLink: '/download_nature',
           expEndpoint: '/save_expense_nature', expDownloadLink: '/download_expenses_nature'
         };
       } else {
         return {
-          name: "جنى الوديان اللبنانية", subtitle: "نظام الكاشير الموحد",
+          name: "جنى الوديان اللبنانية", subtitle: "نظام الكاشير الموحد (حساب 24 ساعة)",
           primary: "#14361b", leaf: "#84b53a", products: productsJana, cats: catsJana,
           bundles: defaultBundlesJana.concat(customJana),
-          endpoint: '/save_jana', statsEndpoint: '/stats_jana', downloadLink: '/download_jana',
+          endpoint: '/save_jana', statsEndpoint: '/stats_jana',
+          downloadDailyLink: '/download_daily_jana', downloadAllLink: '/download_jana',
           expEndpoint: '/save_expense_jana', expDownloadLink: '/download_expenses_jana'
         };
       }
@@ -569,7 +597,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
     function renderBundles() {
       var meta = getActiveMeta();
-      document.getElementById('bundles-section-title').innerText = "🎁 الباقات المجمعة — " + meta.name;
+      document.getElementById('bundles-section-title').innerText = "🎁 البكجات والعروض — " + meta.name;
       var g = document.getElementById('bundles-grid');
       g.innerHTML = "";
       meta.bundles.forEach(b => {
@@ -589,7 +617,7 @@ HTML_PAGE = """<!DOCTYPE html>
               ${oldPriceHtml}
               <span class="bundle-new-price">${b.price.toLocaleString()} د.ع</span>
             </div>
-            <button class="btn-add-bundle" onclick="addBundleToCart(${b.id})">+ إضافة الباقة للفاتورة</button>
+            <button class="btn-add-bundle" onclick="addBundleToCart(${b.id})">+ إضافة البكج للفاتورة</button>
           </div>
         `;
         g.appendChild(card);
@@ -626,7 +654,7 @@ HTML_PAGE = """<!DOCTYPE html>
         oldPrice: 0,
         price: price
       };
-      var storageKey = (currentCompany === 'nature') ? 'custom_bundles_nature' : 'custom_bundles_jana';
+      var storageKey = (currentCompany === 'nature') ? 'custom_bundles_nature_v2' : 'custom_bundles_jana_v2';
       var existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
       existing.push(newBundle);
       localStorage.setItem(storageKey, JSON.stringify(existing));
@@ -657,10 +685,10 @@ HTML_PAGE = """<!DOCTYPE html>
       document.documentElement.style.setProperty('--current-leaf', meta.leaf);
       document.getElementById('app-title').innerText = meta.name;
       document.getElementById('app-subtitle').innerText = meta.subtitle;
-      document.getElementById('dl-link').href = meta.downloadLink;
-      document.getElementById('dl-link').innerText = "📥 إكسل مبيعات " + (currentCompany === 'nature' ? 'الجمال' : 'الجنى');
+      document.getElementById('dl-link').href = meta.downloadDailyLink;
+      document.getElementById('dl-link').innerText = "📥 إكسل اليوم (" + (currentCompany === 'nature' ? 'الجمال' : 'الجنى') + ")";
+      document.getElementById('dl-all-link').href = meta.downloadAllLink;
       document.getElementById('dl-exp-link').href = meta.expDownloadLink;
-      document.getElementById('dl-exp-link').innerText = "📥 إكسل مصاريف " + (currentCompany === 'nature' ? 'الجمال' : 'الجنى');
       document.querySelector('.btn-switch').innerText = (currentCompany === 'jana') ? "🔄 التبديل لجمال الطبيعة" : "🔄 التبديل لجنى الوديان";
       
       var percentBox = document.getElementById('percent-discounts-box');
@@ -817,11 +845,26 @@ HTML_PAGE = """<!DOCTYPE html>
       try {
         var meta = getActiveMeta();
         let res = await fetch(meta.statsEndpoint); let data = await res.json(); 
-        document.getElementById('stat-total').innerText = 'إجمالي المبيعات: ' + data.total_sales.toLocaleString() + ' د.ع'; 
-        document.getElementById('stat-count').innerText = 'عدد الفواتير: ' + data.count; 
-        document.getElementById('stat-exp').innerText = 'إجمالي المصاريف: ' + data.total_expenses.toLocaleString() + ' د.ع'; 
+        document.getElementById('stat-total').innerText = 'مبيعات اليوم (24س): ' + data.total_sales.toLocaleString() + ' د.ع'; 
+        document.getElementById('stat-count').innerText = 'فواتير اليوم: ' + data.count; 
+        document.getElementById('stat-exp').innerText = 'مصاريف اليوم: ' + data.total_expenses.toLocaleString() + ' د.ع'; 
       } catch(e) {}
     }
+
+    async function resetDailyCounter() {
+      if (!confirm("هل أنت متأكد من تصفير عداد الكاشير وبدء حساب يومي جديد الآن؟ (البيانات السابقة تبقى محفوظة في السجل الشامل)")) return;
+      try {
+        let res = await fetch('/reset_daily', { method: 'POST' });
+        let data = await res.json();
+        if (data.status === 'ok') {
+          fetchStats();
+          alert("✅ تم تصفير الكاشير وبدء حساب جديد بنجاح!");
+        }
+      } catch(e) { alert("خطأ في الاتصال بالسيرفر"); }
+    }
+
+    // تحديث تلقائي للإحصائيات كل دقيقة للتحقق من تصفير الـ 24 ساعة
+    setInterval(() => { if(isAdmin) fetchStats(); }, 60000);
 
     async function submitExpense() {
       var amount = parseFloat(document.getElementById("exp-amount").value);
@@ -887,20 +930,36 @@ HTML_PAGE = """<!DOCTYPE html>
 def index():
     return Response(HTML_PAGE, mimetype='text/html')
 
+@app.route('/reset_daily', methods=['POST'])
+def reset_daily():
+    now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
+    with file_lock:
+        with open(RESET_FILE, 'w', encoding='utf-8') as f:
+            f.write(now_str)
+    return jsonify({'status': 'ok', 'reset_at': now_str})
+
 @app.route('/stats_jana')
 def stats_jana():
+    cutoff = get_active_cutoff()
     with file_lock:
         df = pd.read_excel(EXCEL_JANA)
-        total_sales = int(df['الصافي المستلم (د.ع)'].sum()) if len(df) > 0 else 0
-        count = len(df)
+        if len(df) > 0:
+            df_today = df[df['التاريخ والوقت'].astype(str) >= cutoff]
+            total_sales = int(df_today['الصافي المستلم (د.ع)'].sum()) if len(df_today) > 0 else 0
+            count = len(df_today)
+        else:
+            total_sales, count = 0, 0
         df_exp = pd.read_excel(EXPENSES_JANA)
-        total_exp = int(df_exp['المبلغ (د.ع)'].sum()) if len(df_exp) > 0 else 0
+        if len(df_exp) > 0:
+            df_exp_today = df_exp[df_exp['التاريخ والوقت'].astype(str) >= cutoff]
+            total_exp = int(df_exp_today['المبلغ (د.ع)'].sum()) if len(df_exp_today) > 0 else 0
+        else:
+            total_exp = 0
     return jsonify({'total_sales': total_sales, 'count': count, 'total_expenses': total_exp})
 
 @app.route('/save_jana', methods=['POST'])
 def save_jana():
     data = request.json
-    baghdad_tz = timezone(timedelta(hours=3))
     now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
     inv_id = 'JW-' + datetime.now(baghdad_tz).strftime('%H%M%S')
     with file_lock:
@@ -912,7 +971,6 @@ def save_jana():
 @app.route('/save_expense_jana', methods=['POST'])
 def save_expense_jana():
     data = request.json
-    baghdad_tz = timezone(timedelta(hours=3))
     now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
     with file_lock:
         new_row = {
@@ -926,9 +984,20 @@ def save_expense_jana():
         pd.concat([df_exp, pd.DataFrame([new_row])], ignore_index=True).to_excel(EXPENSES_JANA, index=False)
     return jsonify({'status': 'ok'})
 
+@app.route('/download_daily_jana')
+def download_daily_jana():
+    cutoff = get_active_cutoff()
+    today_label = datetime.now(baghdad_tz).strftime('%Y-%m-%d')
+    temp_file = f'حساب_يوم_{today_label}_جنى_الوديان.xlsx'
+    with file_lock:
+        df = pd.read_excel(EXCEL_JANA)
+        df_today = df[df['التاريخ والوقت'].astype(str) >= cutoff] if len(df) > 0 else df
+        df_today.to_excel(temp_file, index=False)
+        return send_file(temp_file, as_attachment=True, download_name=temp_file)
+
 @app.route('/download_jana')
 def download_jana():
-    with file_lock: return send_file(EXCEL_JANA, as_attachment=True, download_name='مبيعات_جنى_الوديان_الموحد.xlsx')
+    with file_lock: return send_file(EXCEL_JANA, as_attachment=True, download_name='مبيعات_جنى_الوديان_الشامل.xlsx')
 
 @app.route('/download_expenses_jana')
 def download_expenses_jana():
@@ -936,18 +1005,26 @@ def download_expenses_jana():
 
 @app.route('/stats_nature')
 def stats_nature():
+    cutoff = get_active_cutoff()
     with file_lock:
         df = pd.read_excel(EXCEL_NATURE)
-        total_sales = int(df['الصافي المستلم (د.ع)'].sum()) if len(df) > 0 else 0
-        count = len(df)
+        if len(df) > 0:
+            df_today = df[df['التاريخ والوقت'].astype(str) >= cutoff]
+            total_sales = int(df_today['الصافي المستلم (د.ع)'].sum()) if len(df_today) > 0 else 0
+            count = len(df_today)
+        else:
+            total_sales, count = 0, 0
         df_exp = pd.read_excel(EXPENSES_NATURE)
-        total_exp = int(df_exp['المبلغ (د.ع)'].sum()) if len(df_exp) > 0 else 0
+        if len(df_exp) > 0:
+            df_exp_today = df_exp[df_exp['التاريخ والوقت'].astype(str) >= cutoff]
+            total_exp = int(df_exp_today['المبلغ (د.ع)'].sum()) if len(df_exp_today) > 0 else 0
+        else:
+            total_exp = 0
     return jsonify({'total_sales': total_sales, 'count': count, 'total_expenses': total_exp})
 
 @app.route('/save_nature', methods=['POST'])
 def save_nature():
     data = request.json
-    baghdad_tz = timezone(timedelta(hours=3))
     now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
     inv_id = 'NAT-' + datetime.now(baghdad_tz).strftime('%H%M%S')
     with file_lock:
@@ -959,7 +1036,6 @@ def save_nature():
 @app.route('/save_expense_nature', methods=['POST'])
 def save_expense_nature():
     data = request.json
-    baghdad_tz = timezone(timedelta(hours=3))
     now_str = datetime.now(baghdad_tz).strftime('%Y-%m-%d %H:%M:%S')
     with file_lock:
         new_row = {
@@ -973,9 +1049,20 @@ def save_expense_nature():
         pd.concat([df_exp, pd.DataFrame([new_row])], ignore_index=True).to_excel(EXPENSES_NATURE, index=False)
     return jsonify({'status': 'ok'})
 
+@app.route('/download_daily_nature')
+def download_daily_nature():
+    cutoff = get_active_cutoff()
+    today_label = datetime.now(baghdad_tz).strftime('%Y-%m-%d')
+    temp_file = f'حساب_يوم_{today_label}_جمال_الطبيعة.xlsx'
+    with file_lock:
+        df = pd.read_excel(EXCEL_NATURE)
+        df_today = df[df['التاريخ والوقت'].astype(str) >= cutoff] if len(df) > 0 else df
+        df_today.to_excel(temp_file, index=False)
+        return send_file(temp_file, as_attachment=True, download_name=temp_file)
+
 @app.route('/download_nature')
 def download_nature():
-    with file_lock: return send_file(EXCEL_NATURE, as_attachment=True, download_name='مبيعات_جمال_الطبيعة.xlsx')
+    with file_lock: return send_file(EXCEL_NATURE, as_attachment=True, download_name='مبيعات_جمال_الطبيعة_الشامل.xlsx')
 
 @app.route('/download_expenses_nature')
 def download_expenses_nature():
